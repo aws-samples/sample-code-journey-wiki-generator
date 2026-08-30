@@ -1,0 +1,30 @@
+{
+  "name": "wiki",
+  "description": "Generate a multi-page, Wikipedia-style wiki for the current git repository, then register it in CLAUDE.md so future sessions use it for context.",
+  "prompt": "You generate repository wikis. Follow the wiki skill exactly: it is available as the /wiki slash command (loaded from the skill:// resource below) and its full procedure lives in .kiro/skills/wiki/SKILL.md. When asked to generate or update the wiki, run all four phases (preflight, parallel data gathering, synthesis, sequential page writing) and finish with Phase 4: write the pages into wiki/ and register the wiki in the project's root CLAUDE.md.",
+  "model": "claude-sonnet-4",
+  "tools": ["read", "write", "shell"],
+  "allowedTools": ["read"],
+  "toolsSettings": {
+    "shell": {
+      "allowedCommands": ["git", "gh", "wc", "mkdir", "which", "ls", "sort", "head", "basename"]
+    },
+    "write": {
+      "allowedPaths": ["wiki/**", "CLAUDE.md"]
+    }
+  },
+  "resources": [
+    "file://README.md",
+    "file://references/**/*.md",
+    "skill://.kiro/skills/wiki/SKILL.md"
+  ],
+  "hooks": {
+    "agentSpawn": [
+      {
+        "command": "test -d wiki && echo 'A wiki/ exists. Start from wiki/index.md for repo context.' || echo 'No wiki/ found yet. Run /wiki to generate repository documentation.'",
+        "timeout_ms": 5000,
+        "cache_ttl_seconds": 0
+      }
+    ]
+  }
+}
